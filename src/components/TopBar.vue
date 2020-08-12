@@ -6,7 +6,7 @@
       mode="horizontal"
       @select="handleSelect"
     >
-      <el-menu-item index="1" @click="go('/index')">首页</el-menu-item>
+      <el-menu-item index="1" @click="go('/index')">天线宝宝母婴商城首页</el-menu-item>
       <el-submenu index="2">
         <template slot="title">商家信息</template>
         <el-menu-item index="2-1">选项1</el-menu-item>

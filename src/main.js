@@ -16,11 +16,7 @@ import {
   setLocalStorage,
   getLocalStorage,
   removeLocalStorage,
-  toDecimal2,
 } from "./common.js";
-Vue.filter("toDecimal", function(value) {
-  return toDecimal2(value);
-});
 
 Vue.config.productionTip = false;
 

@@ -68,7 +68,7 @@ export default {
           console.log(e);
         });
     },
-    submitForm(formName) {
+    submitForm(formName) { // eslint-disable-line no-unused-vars
       if (this.registerForm.userId == "") {
         this.$message.error("用户名不能为空");
         return;

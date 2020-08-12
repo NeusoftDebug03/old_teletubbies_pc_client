@@ -1,17 +1,17 @@
 <template>
   <div class="wrapper">
     <TopBar ref="top"></TopBar>
-    <ul class="food">
-      <li v-for="(f, index) in foodList" :key="index">
-        <div class="food-left">
-          <img :src="f.foodImg" />
-          <div class="food-left-info">
-            <h3>{{ f.foodName }}</h3>
-            <p>{{ f.foodExplain }}</p>
-            <p>&#165;{{ f.foodPrice }}</p>
+    <ul class="shop">
+      <li v-for="(f, index) in shopList" :key="index">
+        <div class="shop-left">
+          <img :src="f.shopImg" />
+          <div class="shop-left-info">
+            <h3>{{ f.shopName }}</h3>
+            <p>{{ f.shopExplain }}</p>
+            <p>&#165;{{ f.shopPrice }}</p>
           </div>
         </div>
-        <div class="food-right">
+        <div class="shop-right">
           <!-- <div >
             <i class="fa fa-minus-circle"></i>
           </div>
@@ -30,7 +30,7 @@ import TopBar from "@/components/TopBar.vue";
 export default {
   data() {
     return {
-      foodList: []
+      shopList: []
     };
   },
   mounted() {
@@ -38,7 +38,7 @@ export default {
     // console.log(this.$route.query.businessid);
     this.$axios
       .post(
-        "food/list",
+        "shop/list",
         this.$qs.stringify({
           businessId: this.$route.query.businessId
         })
@@ -62,14 +62,14 @@ export default {
   height: 100%;
 }
 
-/****************** 食品列表部分 ******************/
-.wrapper .food {
+/****************** 列表部分 ******************/
+.wrapper .shop {
   width: 70%;
   /*使用下外边距避开footer部分*/
   margin-top: 50px;
   margin-bottom: 24px;
 }
-.wrapper .food li {
+.wrapper .shop li {
   width: 100%;
   box-sizing: border-box;
   padding: 10px;
@@ -79,42 +79,42 @@ export default {
   justify-content: space-between;
   align-items: center;
 }
-.wrapper .food li .food-left {
+.wrapper .shop li .shop-left {
   display: flex;
   align-items: center;
 }
-.wrapper .food li .food-left img {
+.wrapper .shop li .shop-left img {
   width: 130px;
   height: 130px;
 }
-.wrapper .food li .food-left .food-left-info {
+.wrapper .shop li .shop-left .shop-left-info {
   margin-left: 20px;
 }
-.wrapper .food li .food-left .food-left-info h3 {
+.wrapper .shop li .shop-left .shop-left-info h3 {
   font-size: 26px;
   color: #555;
 }
-.wrapper .food li .food-left .food-left-info p {
+.wrapper .shop li .shop-left .shop-left-info p {
   font-size: 20px;
   color: #888;
   margin-top: 2px;
 }
-.wrapper .food li .food-right {
+.wrapper .shop li .shop-right {
   width: 30px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-.wrapper .food li .food-right .fa-minus-circle {
+.wrapper .shop li .shop-right .fa-minus-circle {
   font-size: 18px;
   color: #999;
   cursor: pointer;
 }
-.wrapper .food li .food-right p {
+.wrapper .shop li .shop-right p {
   font-size: 16px;
   color: #333;
 }
-.wrapper .food li .food-right .fa-plus-circle {
+.wrapper .shop li .shop-right .fa-plus-circle {
   font-size: 18px;
   color: #0097ef;
   cursor: pointer;
