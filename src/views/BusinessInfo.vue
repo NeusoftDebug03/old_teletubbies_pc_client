@@ -2,7 +2,7 @@
   <div class="wrapper">
     <TopBar ref="top"></TopBar>
     <ul class="shop">
-      <li v-for="(f, index) in shopList" :key="index">
+      <li v-for="(f, index) in shopArr" :key="index">
         <div class="shop-left">
           <img :src="f.shopImg" />
           <div class="shop-left-info">
@@ -12,12 +12,18 @@
           </div>
         </div>
         <div class="shop-right">
-          <!-- <div >
-            <i class="fa fa-minus-circle"></i>
-          </div>
-          <p><span>3</span></p>-->
           <div>
-            <i class="fa fa-plus-circle"></i>
+            <i
+              class="fa fa-minus-circle"
+              @click="minus(index)"
+              v-show="f.quantity != 0"
+            ></i>
+          </div>
+          <p>
+            <span v-show="f.quantity != 0">{{ f.quantity }}</span>
+          </p>
+          <div>
+            <i class="fa fa-plus-circle" @click="add(index)"></i>
           </div>
         </div>
       </li>
@@ -30,29 +36,174 @@ import TopBar from "@/components/TopBar.vue";
 export default {
   data() {
     return {
-      shopList: []
+      businessId: this.$route.query.businessId,
+      shopArr: [],
+      user: {},
     };
   },
   mounted() {
     this.$refs.top.activeIndex = "2";
-    // console.log(this.$route.query.businessid);
-    this.$axios
-      .post(
-        "shop/list",
-        this.$qs.stringify({
-          businessId: this.$route.query.businessId
+    this.user = this.$getSessionStorage("user");
+    this.initShopList();
+  },
+  methods: {
+    initShopList() {
+      this.$axios
+        .post(
+          "shop/list",
+          this.$qs.stringify({
+            businessId: this.businessId,
+          })
+        )
+        .then((response) => {
+          this.shopArr = response.data;
+          for (let i = 0; i < this.shopArr.length; i++) {
+            this.shopArr[i].quantity = 0;
+          }
+
+          //如果已登录，那么去查询购物车中是否已经有食品了，如果有，要将数量显示出来
+          if (this.user != null) {
+            this.listCart();
+          }
         })
-      )
-      .then(response => {
-        this.foodList = response.data;
-      })
-      .catch(error => {
-        console.log(error);
-      });
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    listCart() {
+      //获取购物车数据
+      this.$axios
+        .post(
+          "cart/listbyuser",
+          this.$qs.stringify({
+            userId: this.user.userId,
+          })
+        )
+        .then((response) => {
+          let cartArr = response.data;
+          //遍历所有食品
+          for (let shopItem of this.shopArr) {
+            //给每一个商家添加一个数量属性，默认为0
+            shopItem.quantity = 0;
+            //遍历当前用户的购物车
+            for (let cartItem of cartArr) {
+              //判断当前用户购物车中是否有当前商家的食品，如果有，就把数量加上
+              if (cartItem.shopId == shopItem.shopId) {
+                shopItem.quantity += cartItem.quantity;
+              }
+            }
+          }
+          this.shopArr.sort();
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    add(index) {
+      //首先做登录验证
+      if (this.user == null) {
+        this.$router.push({ path: "/login" });
+        return;
+      }
+
+      if (this.shopArr[index].quantity == 0) {
+        //做insert
+        this.saveCart(index);
+      } else {
+        //做update
+        this.updateCart(index, 1);
+      }
+      this.$refs.top.init();
+    },
+    minus(index) {
+      //首先做登录验证
+      if (this.user == null) {
+        this.$router.push({ path: "/login" });
+        return;
+      }
+
+      if (this.shopArr[index].quantity > 1) {
+        //做update
+        this.updateCart(index, -1);
+      } else {
+        //做delete
+        this.removeCart(index);
+      }
+    },
+    saveCart(index) {
+      this.$axios
+        .post(
+          "cart/insert",
+          this.$qs.stringify({
+            userId: this.user.userId,
+            businessId: this.businessId,
+            shopId: this.shopArr[index].shopId,
+            quantity: 1,
+          })
+        )
+        .then((response) => {
+          if (response.data == 1) {
+            //购物车表中添加一条食品记录，那么这条食品记录的数量要变成1
+            this.shopArr[index].quantity = 1;
+            //这里不是想要排序，而是通过变异方法，让vue监控到数组的变化
+            this.shopArr.sort();
+            this.$refs.top.init();
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    updateCart(index, num) {
+      this.$axios
+        .post(
+          "cart/updatequantity",
+          this.$qs.stringify({
+            userId: this.user.userId,
+            businessId: this.businessId,
+            shopId: this.shopArr[index].shopId,
+            quantity: this.shopArr[index].quantity + num,
+          })
+        )
+        .then((response) => {
+          if (response.data == 1) {
+            //购物车表中添加一条食品记录，那么这条食品记录的数量要变成1
+            this.shopArr[index].quantity += num;
+            //这里不是想要排序，而是通过变异方法，让vue监控到数组的变化
+            this.shopArr.sort();
+            this.$refs.top.init();
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
+    removeCart(index) {
+      this.$axios
+        .post(
+          "cart/delete",
+          this.$qs.stringify({
+            userId: this.user.userId,
+            businessId: this.businessId,
+            shopId: this.shopArr[index].shopId,
+          })
+        )
+        .then((response) => {
+          if (response.data == 1) {
+            //购物车表删除了这条食品记录，那么这条食品记录的数量要变成0
+            this.shopArr[index].quantity = 0;
+            this.shopArr.sort();
+            this.$refs.top.init();
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    },
   },
   components: {
-    TopBar
-  }
+    TopBar,
+  },
 };
 </script>
 <style scoped>
@@ -106,16 +257,17 @@ export default {
   align-items: center;
 }
 .wrapper .shop li .shop-right .fa-minus-circle {
-  font-size: 18px;
+  font-size: 32px;
   color: #999;
   cursor: pointer;
 }
 .wrapper .shop li .shop-right p {
-  font-size: 16px;
+  font-size: 28px;
   color: #333;
+  margin: 0 20px;
 }
 .wrapper .shop li .shop-right .fa-plus-circle {
-  font-size: 18px;
+  font-size: 32px;
   color: #0097ef;
   cursor: pointer;
 }

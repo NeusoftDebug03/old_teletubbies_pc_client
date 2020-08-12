@@ -37,17 +37,40 @@ export default {
       activeIndex: "1",
       isLogin: false,
       userName: "",
+      cartsNum: 0
     };
   },
   mounted() {
-    if (this.$getSessionStorage("user") == null) {
-      this.isLogin = false;
-    } else {
-      this.isLogin = true;
-      this.userName = this.$getSessionStorage("user").userName;
-    }
+    this.init();
   },
   methods: {
+    init() {
+      let user = this.$getSessionStorage("user");
+      if (user == null) {
+        this.isLogin = false;
+      } else {
+        this.isLogin = true;
+        this.userName = user.userName;
+      }
+      //获取购物车数据
+      this.$axios
+        .post(
+          "cart/listbyuser",
+          this.$qs.stringify({
+            userId: user.userId
+          })
+        )
+        .then(response => {
+          let carts = response.data;
+          // console.log(carts);
+
+          this.cartsNum = carts.length;
+          this.$setSessionStorage("carts", response.data);
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    },
     handleSelect(key) {
       console.log(key);
     },
@@ -68,5 +91,8 @@ export default {
   position: fixed;
   top: 0;
   z-index: 1000;
+}
+.mark {
+  margin-bottom: 5px;
 }
 </style>

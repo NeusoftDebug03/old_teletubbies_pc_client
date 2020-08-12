@@ -6,6 +6,9 @@ import Register from "../views/Register.vue";
 import BusinessList from "../views/BusinessList.vue";
 import BusinessInfo from "../views/BusinessInfo.vue";
 import Cart from "../views/Cart.vue";
+import ToOrder from "../views/ToOrder.vue";
+import PaySuccess from "../views/PaySuccess.vue";
+import OrderList from "../views/OrderList.vue";
 // ... ...
 
 Vue.use(VueRouter);
@@ -47,6 +50,21 @@ const routes = [
     path: "/cart",
     name: "Cart",
     component: Cart,
+  },
+  {
+    path: "/toOrder",
+    name: "ToOrder",
+    component: ToOrder,
+  },
+  {
+    path: "/paySuccess",
+    name: "PaySuccess",
+    component: PaySuccess,
+  },
+  {
+    path: "/orderList",
+    name: "OrderList",
+    component: OrderList,
   },
 ];
 

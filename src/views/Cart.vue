@@ -10,11 +10,11 @@
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column label="商品信息" width="350">
         <template slot-scope="scope">
-          <img class="foodImg" :src="scope.row.food.foodImg" alt />
-          <span class="foodName">{{scope.row.food.foodName}}</span>
+          <img class="shopImg" :src="scope.row.shop.shopImg" alt />
+          <span class="shopName">{{scope.row.shop.shopName}}</span>
         </template>
       </el-table-column>
-      <el-table-column label="单价" prop="food.foodPrice"></el-table-column>
+      <el-table-column label="单价" prop="shop.shopPrice"></el-table-column>
       <el-table-column label="数量" width="300" header-align="center" align="center">
         <template slot-scope="scope">
           <el-input-number
@@ -27,7 +27,7 @@
         </template>
       </el-table-column>
       <el-table-column label="合计">
-        <template slot-scope="scope">{{(scope.row.food.foodPrice*scope.row.quantity)|toDecimal}}</template>
+        <template slot-scope="scope">{{(scope.row.shop.shopPrice*scope.row.quantity)|toDecimal}}</template>
       </el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
@@ -146,7 +146,20 @@ export default {
         .catch(e => {
           console.log(e);
         });
-    }
+    },
+    cartToOrder() {
+      //去结算
+      var cartOrder = [];
+      for (var i = 0; i < this.multipleSelection.length; i++) {
+        cartOrder[i] = this.multipleSelection[i];
+      }
+      // console.log(cartOrder);
+      var cartOrderStr = JSON.stringify(cartOrder);
+      this.$router.push({
+        path: "/toOrder",
+        query: { cartOrder: cartOrderStr },
+      });
+    },
   },
   computed: {
     totalCount: function() {
@@ -159,7 +172,7 @@ export default {
     sum: function() {
       let totalSum = 0;
       this.multipleSelection.forEach(cart => {
-        totalSum += cart.food.foodPrice * cart.quantity;
+        totalSum += cart.shop.shopPrice * cart.quantity;
       });
       return totalSum;
     }
